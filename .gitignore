@@ -1,0 +1,43 @@
+# Dependencies
+node_modules
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Build outputs
+dist
+out
+build
+
+# Angular
+/apps/web/dist
+/apps/web/.angular
+
+# NestJS
+/apps/api/dist
+
+# Prisma
+/apps/api/prisma/dev.db
+/apps/api/prisma/.migrations_lock.toml
+
+# Testing
+coverage
+.nyc_output
+
+# Logs
+logs
+*.log
+npm-debug.log*

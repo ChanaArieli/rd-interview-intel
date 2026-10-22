@@ -1,0 +1,86 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                      String   @id @default(uuid())
+  email                   String   @unique
+  name                    String?
+  avatarUrl               String?
+  googleId                String?  @unique
+  roleCategory            String?  // "Backend", "Fullstack", "Frontend", "Data", "DevOps", "QA"
+  seniority               String?  // "Junior", "Mid", "Senior", "Staff / Lead"
+  credits                 Int      @default(1)
+  hasCompletedOnboarding  Boolean  @default(false)
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+
+  unlocks                 CompanyUnlock[]
+
+  @@map("users")
+}
+
+model Company {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  slug      String   @unique
+  industry  String?
+  createdAt DateTime @default(now())
+
+  reports   InterviewReport[]
+  unlockedBy CompanyUnlock[]
+
+  @@map("companies")
+}
+
+model CompanyUnlock {
+  id        String   @id @default(uuid())
+  userId    String
+  companyId String
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, companyId])
+  @@map("company_unlocks")
+}
+
+model InterviewReport {
+  id               String   @id @default(uuid())
+  companyId        String
+  roleCategory     String   // "Backend", "Fullstack", "Frontend", "Data", "DevOps", "QA"
+  seniority        String   // "Junior", "Mid", "Senior", "Staff / Lead"
+  interviewPeriod  String   // "Q4 2026", "Q3 2026", etc.
+  overallProcess   String?  // Hebrew description of interview process
+  difficulty       Int      // 1-5 scale
+  createdAt        DateTime @default(now())
+
+  company          Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  questions        InterviewQuestion[]
+
+  @@map("interview_reports")
+}
+
+model InterviewQuestion {
+  id         String   @id @default(uuid())
+  reportId   String
+  stageType  String   // "System Design", "Live Coding", "Take-Home", "Technical Deep Dive", "Architecture"
+  questionText String
+  followUps  String?
+  tips       String?
+  tags       String[] // e.g., ["Distributed Systems", "Golang", "Performance"]
+  createdAt  DateTime @default(now())
+
+  report     InterviewReport @relation(fields: [reportId], references: [id], onDelete: Cascade)
+
+  @@map("interview_questions")
+}

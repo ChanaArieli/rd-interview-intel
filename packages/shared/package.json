@@ -1,0 +1,16 @@
+{
+  "name": "@rd-intel/shared",
+  "version": "0.0.1",
+  "description": "Shared types, DTOs, and constants for R&D Interview Intelligence platform",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "private": true,
+  "license": "ISC",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.2"
+  }
+}
