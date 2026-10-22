@@ -3,6 +3,7 @@
   "globalDependencies": [".env", ".env.local"],
   "tasks": {
     "build": {
+      "dependsOn": ["^build"],
       "outputs": ["dist/**"],
       "cache": false
     },
@@ -11,9 +12,11 @@
       "persistent": true
     },
     "lint": {
+      "dependsOn": ["^build"],
       "cache": true
     },
     "test": {
+      "dependsOn": ["^build"],
       "cache": true
     }
   }

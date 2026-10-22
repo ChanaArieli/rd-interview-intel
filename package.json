@@ -9,7 +9,9 @@
     "build": "turbo run build",
     "lint": "turbo run lint",
     "test": "turbo run test",
-    "db:push": "cd apps/api && pnpm prisma db push",
+    "db:up": "docker compose up -d --wait",
+    "db:down": "docker compose down",
+    "db:push":"cd apps/api && pnpm prisma db push",
     "db:seed": "cd apps/api && pnpm prisma db seed",
     "db:studio": "cd apps/api && pnpm prisma studio"
   },
