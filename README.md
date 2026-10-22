@@ -230,3 +230,22 @@ pnpm prisma migrate dev  # Creates migration + applies it
 - **Dynamic Company Creation**: Accept any company name, auto-create if needed
 
 For full project details, see **CLAUDE.md**.
+
+## Deployment
+
+### To Production on Render
+
+This project is configured for easy deployment to **Render** with PostgreSQL. See **DEPLOY.md** for step-by-step instructions.
+
+**Quick Start:**
+1. Create PostgreSQL database on Render
+2. Push to GitHub
+3. Deploy backend & frontend using `render.yaml` or manual setup
+4. Run database migrations in Render shell
+5. Configure environment variables
+
+See **[DEPLOY.md](./DEPLOY.md)** for complete deployment guide, including:
+- PostgreSQL setup and best practices
+- Environment variable configuration
+- Database migration strategies
+- Troubleshooting common issues

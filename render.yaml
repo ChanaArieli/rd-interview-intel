@@ -1,0 +1,47 @@
+services:
+  - type: web
+    name: rd-intel-backend
+    runtime: node
+    plan: starter
+    buildCommand: pnpm install && pnpm build
+    startCommand: cd apps/api && pnpm start
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: NODE_ENV
+        value: production
+      - key: API_PORT
+        value: "3001"
+    healthCheckPath: /api/health
+    routes:
+      - path: /api
+        destination: /api
+
+  - type: web
+    name: rd-intel-frontend
+    runtime: node
+    plan: starter
+    buildCommand: pnpm install && pnpm build
+    startCommand: cd apps/web && node -m http.server -b 0.0.0.0 -d dist
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: API_URL
+        value: https://rd-intel-backend.onrender.com/api
+    routes:
+      - path: /
+        destination: /
+
+  - type: pserv
+    name: rd-intel-postgres
+    plan: starter
+    ipAllowList: []
+    databaseName: rd_intel
+    username: rd_intel_user
+    passwordSecret: DATABASE_PASSWORD
