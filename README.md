@@ -20,7 +20,12 @@ Israeli tech company interview intelligence and engineering culture platform —
 ### 1. Install Dependencies
 
 ```bash
-pnpm install
+pnpm install --allow-build=puppeteer
+```
+
+If you get build script warnings, run:
+```bash
+pnpm install --allow-build=puppeteer
 ```
 
 ### 2. Start PostgreSQL
@@ -38,8 +43,13 @@ docker ps  # Should show postgres container
 
 ```bash
 cd apps/api
-pnpm prisma migrate deploy  # Apply migrations
+pnpm prisma migrate dev      # Apply migrations & generate client
 pnpm prisma db seed          # Seed companies & sample data
+```
+
+If Prisma client isn't generated:
+```bash
+pnpm prisma generate
 ```
 
 ### 4. Configure Environment
@@ -96,10 +106,34 @@ This returns seeded Israeli tech companies (Wiz, Monday.com, Wix, etc.) with:
 - Interview stage types
 - Aggregated tags
 
-### 3. Browse Frontend
+### 3. Get Company Details
+```bash
+curl http://localhost:3001/api/companies/wiz
+```
+
+Returns company with all interview reports and questions.
+
+### 4. Submit an Interview Question
+```bash
+curl -X POST http://localhost:3001/api/interviews/submit \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "companyName": "Your Company",
+    "interviewPeriod": "Q4 2026",
+    "questions": [{
+      "stageType": "Live Coding",
+      "questionText": "Your question here",
+      "tags": []
+    }]
+  }'
+```
+
+### 5. Browse Frontend
 Open http://localhost:4200 in your browser. You should see:
 - Company list with interview reports
-- Interview questions grouped by stage type
+- "תרום שאלה" (Contribute Question) button to submit new questions
+- "צפה בפרטים" (View Details) button to see all questions for a company
+- Interview questions grouped by report
 - Hebrew RTL layout
 
 ## Project Structure
@@ -165,11 +199,34 @@ cd apps/api
 pnpm prisma migrate dev  # Creates migration + applies it
 ```
 
+## Features
+
+### Current Implementation
+- ✅ **Company List** - Browse all seeded Israeli tech companies with stats
+- ✅ **Contribute Questions** - Modal form to submit interview questions
+  - Free-text company name with autocomplete suggestions
+  - Auto-creates new companies if not in database
+  - Required fields: company name, interview period, stage type, question text
+  - Optional fields: role category, seniority, difficulty, follow-ups, tips, tags
+- ✅ **Company Details** - View all interview questions for a company
+  - Questions grouped by interview report
+  - Display stage type, follow-ups, tips, and tags
+  - Report metadata (role, seniority, period, difficulty)
+- ✅ **Routing** - Navigate between companies list and detail pages
+- ✅ **RTL Support** - Full Hebrew right-to-left layout
+
+### Planned
+- 🔄 Google OAuth authentication
+- 🔄 Credit system (earn/spend credits)
+- 🔄 Interview report quality validation (LLM gate)
+- 🔄 User profiles and company unlocks
+
 ## Architecture
 
 - **Strict Anonymity**: Interview submissions have no user ID; anonymous knowledge base
 - **Credit Economy**: Users get 1 starter credit on signup, earn credits by submitting valid reports
 - **Contract-First**: Shared TypeScript types in `packages/shared` keep backend/frontend in sync
 - **CORS**: Backend CORS enabled for `http://localhost:4200`
+- **Dynamic Company Creation**: Accept any company name, auto-create if needed
 
 For full project details, see **CLAUDE.md**.
