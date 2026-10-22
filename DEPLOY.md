@@ -1,47 +1,61 @@
-# Deployment Guide: Render
+# Deployment Guide: Render + Supabase
 
 ## Overview
 
 This guide covers deploying the R&D Interview Intelligence platform to **Render** using:
 - **Backend**: NestJS on Render Web Service
-- **Frontend**: Angular static site on Render Web Service
-- **Database**: PostgreSQL on Render Managed Database
+- **Frontend**: Angular on Render Web Service
+- **Database**: FREE PostgreSQL on Supabase
+
+**Cost**: ~$7/month for two Render services. Database is **FREE** (500MB, perfect for MVP).
 
 ---
 
-## Step 1: Set Up PostgreSQL on Render
+## Step 1: Set Up FREE PostgreSQL on Supabase
 
-### Create a PostgreSQL Database
+### Create a Supabase Project (Free Forever)
 
-1. Go to [Render Dashboard](https://dashboard.render.com)
-2. Click **New +** → **PostgreSQL**
+1. Go to [supabase.com](https://supabase.com) → Sign up (free)
+2. Click **New Project**
 3. Configure:
-   - **Name**: `rd-intel-postgres`
-   - **Database**: `rd_intel`
-   - **User**: `rd_intel_user`
-   - **Region**: Choose closest to your target users
-   - **Plan**: Starter ($7/month) or higher
+   - **Name**: `rd-intel`
+   - **Password**: Generate strong password (or create account password)
+   - **Region**: Choose closest to your users
+   - **Plan**: Free (default)
 
-4. **Copy the connection string** (looks like):
+4. Wait 1-2 minutes for project to initialize
+5. Go to **Project Settings** → **Database** → **Connection string**
+6. Copy the URI (Session or Connection Pooling):
    ```
-   postgresql://rd_intel_user:password@pg-xxx.render.com:5432/rd_intel
+   postgresql://postgres:[PASSWORD]@db.xxx.supabase.co:5432/postgres
    ```
 
-### Important Notes on PostgreSQL Production
+### Supabase Free Tier Includes
 
-**Connection Pooling:**
-- Render PostgreSQL has built-in connection pooling
-- For production, add `?schema=public` to the connection string if needed
-- Max connections on Starter: 20
+✅ **500MB storage** (plenty for MVP)
+✅ **2GB bandwidth/month**
+✅ **50k monthly active users**
+✅ **Automatic daily backups** (7-day retention)
+✅ **SSL/TLS enforced**
+✅ **Connection pooling built-in**
+✅ **Zero cost** (forever free, no credit card required after 7 days)
+
+### Important Notes
+
+**Connection String Format:**
+- Use the connection string provided by Supabase
+- Includes built-in connection pooling
+- SSL is automatic (sslmode=require)
+
+**Scaling:**
+- 500MB is enough for ~1M rows with normal data
+- When you need more: upgrade to paid plan ($25+/month for 8GB)
+- No downtime during upgrade
 
 **Backups:**
-- Render auto-backs up PostgreSQL daily
-- Stored for 7 days (Starter plan)
-- Upgrade plan for longer retention
-
-**SSL/TLS:**
-- Render enforces SSL by default
-- Connection strings automatically use `sslmode=require`
+- Automatic daily backups (7 days on free plan)
+- Manual backups available in Supabase dashboard
+- Download backups as SQL files anytime
 
 ---
 
@@ -176,7 +190,7 @@ For a lighter-weight deployment, serve the Angular build as static files:
 Set in Render dashboard under **Environment**:
 
 ```
-DATABASE_URL = postgresql://rd_intel_user:PASSWORD@pg-xxx.render.com:5432/rd_intel
+DATABASE_URL = postgresql://postgres:YOUR_PASSWORD@db.xxx.supabase.co:5432/postgres
 NODE_ENV = production
 API_PORT = 3001
 FRONTEND_URL = https://rd-intel-frontend.onrender.com
@@ -184,6 +198,11 @@ JWT_SECRET = (generate at least 32 random characters)
 GOOGLE_CLIENT_ID = (from Google Cloud Console)
 GOOGLE_CLIENT_SECRET = (from Google Cloud Console)
 ```
+
+**Get DATABASE_URL from Supabase:**
+1. Go to [supabase.com](https://supabase.com) → Your Project
+2. Click **Project Settings** → **Database**
+3. Copy the **Connection string (URI)**
 
 ### For Frontend Service
 
@@ -231,81 +250,94 @@ Open `https://rd-intel-frontend.onrender.com` in browser
 ## Common Issues & Solutions
 
 ### **Issue 1: Database connection timeout**
-**Cause**: PostgreSQL may still be initializing
-**Solution**: Wait 2-3 minutes after creating the DB, then retry deployment
+**Cause**: Supabase project still initializing
+**Solution**: Wait 2-3 minutes after creating the project, then try again
 
-### **Issue 2: "Cannot find module" during build**
+### **Issue 2: "password authentication failed"**
+**Cause**: Wrong connection string or password
+**Solution**: 
+1. Go to Supabase dashboard → Your Project
+2. Click **Settings** → **Database**
+3. Copy the connection string again (including password)
+4. Paste into `DATABASE_URL` env var
+
+### **Issue 3: "Cannot find module" during build**
 **Cause**: pnpm workspaces not properly installed
 **Solution**: Ensure `pnpm-workspace.yaml` is correct; add to build command:
 ```
 pnpm install --frozen-lockfile && pnpm build
 ```
 
-### **Issue 3: Frontend returns 404 for routes**
+### **Issue 4: Frontend returns 404 on routes**
 **Cause**: SPA routing not configured
-**Solution**: If using Static Site, add route `/*` → `index.html` in **Routes**
+**Solution**: Using `server.js` handles this automatically. Ensure start command is `cd apps/web && node server.js`
 
-### **Issue 4: CORS errors in browser**
+### **Issue 5: CORS errors in browser**
 **Cause**: `FRONTEND_URL` env var not set correctly
 **Solution**: Verify in backend environment variables and restart the service
 
-### **Issue 5: Migrations failed on first deploy**
-**Cause**: Database schema not initialized
+### **Issue 6: Migrations failed on first deploy**
+**Cause**: Database schema not initialized or connection string wrong
 **Solution**: Use Render Shell to manually run:
 ```bash
 cd apps/api && pnpm prisma db push && pnpm prisma db seed
 ```
+If connection fails, verify `DATABASE_URL` env var is correct
 
 ---
 
-## PostgreSQL Production Best Practices
+## Supabase PostgreSQL Production Best Practices
 
 ### 1. Connection Pooling
-- Render handles connection pooling automatically
-- For very high traffic, consider upgrading to **Standard** or **Pro** plan
-- Max connections:
-  - **Starter**: 20
-  - **Standard**: 50
-  - **Pro**: 100+
+- Supabase handles connection pooling automatically (PgBouncer)
+- Built-in pooling supports high concurrency
+- Max connections on Free tier: 20 concurrent connections
+- Upgrade to Pro plan for higher concurrency if needed
 
 ### 2. Backups
-- **Automatic**: Daily backups (7-day retention on Starter)
-- **Manual**: Use `pg_dump`:
+- **Automatic**: Daily backups (7-day retention on free tier)
+- **Manual backup**: Go to Supabase **Project Settings** → **Backups** → Download
+- **Restore from backup**: Click any backup → **Restore** (2-3 min process)
+- **Export SQL**: 
   ```bash
-  pg_dump $DATABASE_URL > backup.sql
+  pg_dump "postgresql://postgres:PASSWORD@db.xxx.supabase.co:5432/postgres" > backup.sql
   ```
-- **Restore**: Use `psql` to restore from dump
 
 ### 3. Monitoring
-- View logs in Render dashboard under **Logs**
-- Watch for connection pool exhaustion or slow queries
-- Use Prisma's query logging if needed
+- View storage usage: **Project Settings** → **Database**
+- View connection logs: **Project Settings** → **Logs**
+- Monitor bandwidth: **Project Settings** → **Billing**
+- Supabase dashboard shows real-time metrics
 
 ### 4. Scaling
-- **Development**: Starter plan ($7/month, 20 connections)
-- **Production**: Upgrade to Standard+ plan (50+ connections, better specs)
-- **High Traffic**: Consider switching to AWS RDS or Supabase for auto-scaling
+- **Free Tier**: 500MB storage, 2GB bandwidth/month (good for MVP)
+- **When to upgrade**: Approaching 500MB or 2GB bandwidth
+- **Pro Plan**: $25+/month for 8GB storage, unlimited bandwidth
+- **No downtime**: Upgrades are instant with no app restart
 
 ### 5. Data Retention
-- Starter plan: 7-day automatic backups
-- Upgrade for longer retention or manual backup schedules
+- Free tier: 7-day automatic backups (retention configurable in Supabase)
+- Pro tier: Up to 30-day retention
+- Download backups anytime as SQL files for external storage
 
 ---
 
 ## Deployment Checklist
 
-- [ ] PostgreSQL instance created on Render
-- [ ] Database connection string copied
-- [ ] Backend service created with correct env vars
-- [ ] Database migrations run (`prisma db push`)
-- [ ] Database seeded with sample data (`prisma db seed`)
-- [ ] Backend health check working
-- [ ] Frontend service created
-- [ ] CORS configured for production URL
+- [ ] Supabase project created (free tier)
+- [ ] Supabase connection string copied
+- [ ] Backend service created on Render
+- [ ] DATABASE_URL env var set in backend
+- [ ] Database migrations run (`cd apps/api && pnpm prisma db push`)
+- [ ] Database seeded with sample data (`cd apps/api && pnpm prisma db seed`)
+- [ ] Backend health check working (`/api/health` returns 200)
+- [ ] Frontend service created on Render
+- [ ] Frontend connects to backend API
+- [ ] CORS configured for production frontend URL
 - [ ] API connectivity tested from frontend
 - [ ] Environment variables set in both services
-- [ ] JWT_SECRET generated and set
-- [ ] Google OAuth credentials configured (if applicable)
+- [ ] JWT_SECRET generated and set (32+ random chars)
+- [ ] Google OAuth credentials configured (if implementing auth)
 
 ---
 

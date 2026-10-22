@@ -1,17 +1,21 @@
-# Render Deployment Quickstart
+# Render + Supabase Deployment Quickstart
 
 **Full guide**: See [DEPLOY.md](./DEPLOY.md)
 
+**Cost**: Backend $7/mo (Render) + Database $0/mo (Supabase Free) = **$7/month** 🎉
+
 ---
 
-## 1. Create PostgreSQL (5 min)
+## 1. Create FREE PostgreSQL on Supabase (3 min)
 
-1. Go to [render.com/dashboard](https://dashboard.render.com)
-2. **New +** → **PostgreSQL**
-3. Name: `rd-intel-postgres`
-4. Database: `rd_intel`, User: `rd_intel_user`
-5. Choose region, Starter plan ($7/mo)
-6. **Create** and copy connection string
+1. Go to [supabase.com](https://supabase.com) → Sign up (free, no credit card)
+2. Click **New Project**
+3. Name: `rd-intel`, choose your region
+4. Generate password (or use your account password)
+5. Select **Free plan** → Create
+6. Wait 1-2 min for initialization
+7. Go to **Project Settings** → **Database** → **Connection string**
+8. Copy the URI (looks like: `postgresql://postgres:PASSWORD@db.xxx.supabase.co:5432/postgres`)
 
 ---
 
@@ -39,7 +43,7 @@
 In Render backend service **Environment**:
 
 ```
-DATABASE_URL=postgresql://rd_intel_user:PASSWORD@pg-xxx.render.com:5432/rd_intel
+DATABASE_URL=postgresql://postgres:PASSWORD@db.xxx.supabase.co:5432/postgres
 NODE_ENV=production
 API_PORT=3001
 FRONTEND_URL=https://rd-intel-frontend.onrender.com
@@ -47,6 +51,8 @@ JWT_SECRET=generate-32-random-characters
 GOOGLE_CLIENT_ID=your-google-oauth-id
 GOOGLE_CLIENT_SECRET=your-google-oauth-secret
 ```
+
+Replace `PASSWORD` with your Supabase database password and `db.xxx.supabase.co` with your actual Supabase host.
 
 ---
 
@@ -150,10 +156,14 @@ pnpm prisma migrate status
 
 ## Billing Estimate (First Year)
 
-- PostgreSQL (Starter): $7 × 12 = **$84**
-- Backend (Starter): $7 × 12 = **$84**
-- Frontend (Starter): $7 × 12 = **$84**
-- **Total**: ~**$252/year** (or upgrade to Standard for ~$1,260/year for production)
+- **PostgreSQL (Supabase Free)**: $0 × 12 = **$0** 🎉
+- Backend (Render Starter): $7 × 12 = **$84**
+- Frontend (Render Starter): $7 × 12 = **$84**
+- **Total**: ~**$168/year** (vs $252 with paid database!)
+
+When you need more:
+- Supabase upgrade: $25+/month for 8GB storage
+- Render upgrade: $12-36+/month depending on needs
 
 ---
 

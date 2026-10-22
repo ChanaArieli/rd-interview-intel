@@ -28,20 +28,12 @@ services:
     runtime: node
     plan: starter
     buildCommand: pnpm install && pnpm build
-    startCommand: cd apps/web && node -m http.server -b 0.0.0.0 -d dist
+    startCommand: cd apps/web && node server.js
     envVars:
       - key: NODE_ENV
         value: production
-      - key: API_URL
-        value: https://rd-intel-backend.onrender.com/api
+      - key: PORT
+        value: "3000"
     routes:
       - path: /
         destination: /
-
-  - type: pserv
-    name: rd-intel-postgres
-    plan: starter
-    ipAllowList: []
-    databaseName: rd_intel
-    username: rd_intel_user
-    passwordSecret: DATABASE_PASSWORD
