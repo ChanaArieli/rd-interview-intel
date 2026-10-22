@@ -3,7 +3,6 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { CompaniesService } from '../companies.service';
 import { CompanyDetailDto } from '@rd-intel/shared';
-import { InterviewQuestionDto } from '@rd-intel/shared';
 
 @Component({
   selector: 'app-company-detail',

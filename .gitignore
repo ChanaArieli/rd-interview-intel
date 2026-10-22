@@ -1,6 +1,5 @@
 # Dependencies
 node_modules
-pnpm-lock.yaml
 package-lock.json
 yarn.lock
 
@@ -28,6 +27,9 @@ build
 
 # NestJS
 /apps/api/dist
+
+# Turborepo
+.turbo
 
 # Prisma
 /apps/api/prisma/dev.db
