@@ -19,9 +19,6 @@ services:
       - key: API_PORT
         value: "3001"
     healthCheckPath: /api/health
-    routes:
-      - path: /api
-        destination: /api
 
   - type: web
     name: rd-intel-frontend
@@ -32,8 +29,3 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
-      - key: PORT
-        value: "3000"
-    routes:
-      - path: /
-        destination: /
