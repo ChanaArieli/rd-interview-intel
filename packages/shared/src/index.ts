@@ -33,8 +33,8 @@ export interface CompanyDetailDto extends CompanySummaryDto {
 export interface InterviewReportDto {
   id: string;
   companyId: string;
-  roleCategory: string;
-  seniority: string;
+  roleCategory: string | null;
+  seniority: string | null;
   interviewPeriod: string;
   overallProcess: string | null;
   difficulty: number;
@@ -56,12 +56,12 @@ export interface InterviewQuestionDto {
 
 // Create/Submission DTOs
 export interface CreateInterviewSubmissionDto {
-  companyId: string;
-  roleCategory: string;
-  seniority: string;
+  companyName: string;
+  roleCategory?: string;
+  seniority?: string;
   interviewPeriod: string;
-  overallProcess: string;
-  difficulty: number;
+  overallProcess?: string;
+  difficulty?: number;
   questions: CreateInterviewQuestionDto[];
 }
 

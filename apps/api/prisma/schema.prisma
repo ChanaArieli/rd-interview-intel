@@ -57,8 +57,8 @@ model CompanyUnlock {
 model InterviewReport {
   id               String   @id @default(uuid())
   companyId        String
-  roleCategory     String   // "Backend", "Fullstack", "Frontend", "Data", "DevOps", "QA"
-  seniority        String   // "Junior", "Mid", "Senior", "Staff / Lead"
+  roleCategory     String?  // "Backend", "Fullstack", "Frontend", "Data", "DevOps", "QA"
+  seniority        String?  // "Junior", "Mid", "Senior", "Staff / Lead"
   interviewPeriod  String   // "Q4 2026", "Q3 2026", etc.
   overallProcess   String?  // Hebrew description of interview process
   difficulty       Int      // 1-5 scale

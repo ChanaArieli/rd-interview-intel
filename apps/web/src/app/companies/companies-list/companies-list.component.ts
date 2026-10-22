@@ -1,14 +1,29 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { CompaniesService } from '../companies.service';
+import { SubmitInterviewModalComponent } from '../../interviews/submit-interview-modal/submit-interview-modal.component';
 import { CompanySummaryDto } from '@rd-intel/shared';
 
 @Component({
   selector: 'app-companies-list',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, SubmitInterviewModalComponent],
   template: `
+    <app-submit-interview-modal
+      #submitModal
+      [companies]="companiesWithQuestions()"
+      (submitted)="onSubmitSuccess()">
+    </app-submit-interview-modal>
+
     <div class="max-w-7xl mx-auto px-4 py-8">
+      <!-- Header with Button -->
+      <div class="flex items-center justify-between mb-8">
+        <h1 class="text-3xl font-bold">חברות ראיונות</h1>
+        <button (click)="openSubmitModal()" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-6 rounded">
+          תרום שאלה
+        </button>
+      </div>
       <!-- Loading State -->
       <div *ngIf="isLoading()" class="text-center py-12">
         <div class="inline-block">
@@ -23,9 +38,9 @@ import { CompanySummaryDto } from '@rd-intel/shared';
         <p class="text-red-600 text-sm mt-1">{{ error() }}</p>
       </div>
 
-      <!-- Companies Grid -->
-      <div *ngIf="!isLoading() && !error() && companies().length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div *ngFor="let company of companies()" class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow p-6">
+      <!-- Companies Grid (only show companies with questions) -->
+      <div *ngIf="!isLoading() && !error() && companiesWithQuestions().length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div *ngFor="let company of companiesWithQuestions()" class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow p-6">
           <div class="flex items-start justify-between mb-3">
             <div>
               <h3 class="text-xl font-bold text-gray-900">{{ company.name }}</h3>
@@ -69,7 +84,7 @@ import { CompanySummaryDto } from '@rd-intel/shared';
             </div>
 
             <!-- Action Button -->
-            <button class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded transition-colors">
+            <button (click)="viewCompanyDetails(company.slug)" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded transition-colors">
               צפה בפרטים
             </button>
           </div>
@@ -77,22 +92,37 @@ import { CompanySummaryDto } from '@rd-intel/shared';
       </div>
 
       <!-- Empty State -->
-      <div *ngIf="!isLoading() && !error() && companies().length === 0" class="text-center py-12 bg-white rounded-lg">
-        <p class="text-gray-600 text-lg">לא נמצאו חברות</p>
+      <div *ngIf="!isLoading() && !error() && companiesWithQuestions().length === 0" class="text-center py-12 bg-white rounded-lg">
+        <p class="text-gray-600 text-lg">אין חברות עם שאלות ראיונות עדיין</p>
       </div>
     </div>
   `,
   styles: []
 })
 export class CompaniesListComponent implements OnInit {
+  @ViewChild('submitModal') submitModal?: SubmitInterviewModalComponent;
+
   companies = signal<CompanySummaryDto[]>([]);
+  companiesWithQuestions = signal<CompanySummaryDto[]>([]);
   isLoading = signal(true);
   error = signal<string | null>(null);
 
-  constructor(private companiesService: CompaniesService) {}
+  constructor(private companiesService: CompaniesService, private router: Router) {}
 
   ngOnInit() {
     this.loadCompanies();
+  }
+
+  openSubmitModal() {
+    this.submitModal?.open();
+  }
+
+  onSubmitSuccess() {
+    this.loadCompanies();
+  }
+
+  viewCompanyDetails(slug: string) {
+    this.router.navigate(['/companies', slug]);
   }
 
   private loadCompanies() {
@@ -102,6 +132,7 @@ export class CompaniesListComponent implements OnInit {
     this.companiesService.getAll().subscribe({
       next: (data) => {
         this.companies.set(data);
+        this.companiesWithQuestions.set(data.filter(c => c.questionCount > 0));
         this.isLoading.set(false);
       },
       error: (err) => {

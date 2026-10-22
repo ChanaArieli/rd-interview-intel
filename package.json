@@ -2,6 +2,7 @@
   "name": "rd-interview-intelligence",
   "version": "0.0.1",
   "private": true,
+  "packageManager": "pnpm@12.14.0",
   "description": "Israeli R&D Interview Intelligence & Engineering Culture Platform",
   "scripts": {
     "dev": "turbo run dev --parallel",
