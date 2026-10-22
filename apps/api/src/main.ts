@@ -7,9 +7,13 @@ async function bootstrap() {
 
   app.setGlobalPrefix('api');
 
-  // Enable CORS for local development
+  // Enable CORS for local development and production
+  const allowedOrigins = [
+    'http://localhost:4200',
+    process.env.FRONTEND_URL || 'http://localhost:4200'
+  ];
   app.enableCors({
-    origin: 'http://localhost:4200',
+    origin: allowedOrigins,
     credentials: true
   });
 
@@ -17,8 +21,8 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe());
 
   const port = process.env.API_PORT || 3001;
-  await app.listen(port, () => {
-    console.log(`🚀 API server running on http://localhost:${port}/api`);
+  await app.listen(port, '0.0.0.0', () => {
+    console.log(`🚀 API server running on port ${port}/api`);
   });
 }
 

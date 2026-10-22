@@ -1,0 +1,31 @@
+services:
+  - type: web
+    name: rd-intel-backend
+    runtime: node
+    plan: starter
+    buildCommand: pnpm install && pnpm build
+    startCommand: cd apps/api && pnpm start
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: NODE_ENV
+        value: production
+      - key: API_PORT
+        value: "3001"
+    healthCheckPath: /api/health
+
+  - type: web
+    name: rd-intel-frontend
+    runtime: node
+    plan: starter
+    buildCommand: pnpm install && pnpm build
+    startCommand: cd apps/web && node server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
