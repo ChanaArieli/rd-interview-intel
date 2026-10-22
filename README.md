@@ -230,3 +230,29 @@ pnpm prisma migrate dev  # Creates migration + applies it
 - **Dynamic Company Creation**: Accept any company name, auto-create if needed
 
 For full project details, see **CLAUDE.md**.
+
+## Deployment
+
+### To Production: Render + Supabase (FREE Database!)
+
+This project is configured for easy deployment to **Render** with **FREE PostgreSQL on Supabase** (no credit card required).
+
+**Cost**: ~$7/month (two Render services) + **$0 database** = **$7/month total!**
+
+**Quick Start:**
+1. Create FREE Supabase project (500MB storage)
+2. Create two Render web services (backend + frontend)
+3. Push to GitHub
+4. Deploy using `render.yaml` blueprint or manual setup
+5. Run database migrations
+6. Configure environment variables
+
+**Setup Guides:**
+- **[SUPABASE_SETUP.md](./SUPABASE_SETUP.md)** — Quick Supabase setup (5 min)
+- **[RENDER_QUICKSTART.md](./RENDER_QUICKSTART.md)** — Quick Render deployment (5 step overview)
+- **[DEPLOY.md](./DEPLOY.md)** — Complete detailed guide including:
+  - Step-by-step Supabase & Render setup
+  - PostgreSQL best practices
+  - Database migration strategies
+  - Environment configuration
+  - Troubleshooting

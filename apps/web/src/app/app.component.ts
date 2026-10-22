@@ -10,9 +10,9 @@ import { RouterOutlet, Router } from '@angular/router';
       <header class="bg-white shadow cursor-pointer" (click)="goHome()">
         <div class="max-w-7xl mx-auto px-4 py-6">
           <h1 class="text-3xl font-bold text-gray-900">
-            R&D Interview Intelligence
+            מאגר שאלות מראיונות עבודה לתפקידי פיתוח תוכנה
           </h1>
-          <p class="text-gray-600 mt-1">Hebrew RTL Technical Interview Platform</p>
+          <p class="text-gray-600 mt-1">חברות הייטק הפועלות בישראל</p>
         </div>
       </header>
 

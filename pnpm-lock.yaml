@@ -302,6 +302,9 @@ importers:
       '@rd-intel/shared':
         specifier: workspace:*
         version: link:../../packages/shared
+      express:
+        specifier: ^4.18.2
+        version: 4.22.3(supports-color@8.1.1)
       rxjs:
         specifier: ^7.8.2
         version: 7.8.2

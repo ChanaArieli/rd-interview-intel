@@ -19,7 +19,7 @@ import { CompanySummaryDto } from '@rd-intel/shared';
     <div class="max-w-7xl mx-auto px-4 py-8">
       <!-- Header with Button -->
       <div class="flex items-center justify-between mb-8">
-        <h1 class="text-3xl font-bold">חברות ראיונות</h1>
+        <h1 class="text-3xl font-bold">רשימת חברות </h1>
         <button (click)="openSubmitModal()" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-6 rounded">
           תרום שאלה
         </button>
@@ -40,7 +40,7 @@ import { CompanySummaryDto } from '@rd-intel/shared';
 
       <!-- Companies Grid (only show companies with questions) -->
       <div *ngIf="!isLoading() && !error() && companiesWithQuestions().length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div *ngFor="let company of companiesWithQuestions()" class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow p-6">
+        <div *ngFor="let company of companiesWithQuestions()" class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow p-6 flex flex-col">
           <div class="flex items-start justify-between mb-3">
             <div>
               <h3 class="text-xl font-bold text-gray-900">{{ company.name }}</h3>
@@ -48,7 +48,7 @@ import { CompanySummaryDto } from '@rd-intel/shared';
             </div>
           </div>
 
-          <div class="border-t pt-4 mt-4">
+          <div class="border-t pt-4 mt-4 flex flex-col flex-grow">
             <div class="grid grid-cols-2 gap-4 text-center mb-4">
               <div class="bg-blue-50 rounded p-3">
                 <p class="text-2xl font-bold text-blue-600">{{ company.reportCount }}</p>
@@ -71,7 +71,7 @@ import { CompanySummaryDto } from '@rd-intel/shared';
             </div>
 
             <!-- Tags -->
-            <div *ngIf="company.tags.length > 0" class="mb-3">
+            <div *ngIf="company.tags.length > 0" class="mb-3 flex-grow">
               <p class="text-xs font-semibold text-gray-700 mb-2">תגיות טכניות:</p>
               <div class="flex flex-wrap gap-1">
                 <span *ngFor="let tag of company.tags.slice(0, 5)" class="inline-block px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded">
@@ -84,7 +84,7 @@ import { CompanySummaryDto } from '@rd-intel/shared';
             </div>
 
             <!-- Action Button -->
-            <button (click)="viewCompanyDetails(company.slug)" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded transition-colors">
+            <button (click)="viewCompanyDetails(company.slug)" class="mt-auto w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded transition-colors">
               צפה בפרטים
             </button>
           </div>

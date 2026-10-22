@@ -3,6 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { CompaniesService } from '../companies.service';
 import { CompanyDetailDto } from '@rd-intel/shared';
+import { InterviewQuestionDto } from '@rd-intel/shared';
 
 @Component({
   selector: 'app-company-detail',
@@ -66,15 +67,15 @@ import { CompanyDetailDto } from '@rd-intel/shared';
 
       <!-- Questions Section -->
       <div *ngIf="!isLoading() && !error() && company()" class="bg-white rounded-lg shadow-md p-6">
-        <h2 class="text-2xl font-bold mb-6">שאלות ראיון</h2>
+        <h2 class="text-2xl font-bold mb-6">שאלות אמיתיות מראיונות עבודה</h2>
 
         <div *ngIf="company() && company()!.reports.length === 0" class="text-center py-8">
           <p class="text-gray-600">אין שאלות עדיין</p>
         </div>
 
-        <div *ngFor="let report of company()?.reports; let i = index" class="mb-8 pb-8 border-b last:border-b-0">
+        <div *ngFor="let report of company()?.reports; let i = index" class="mb-6 p-6 bg-gray-50 rounded-lg border-l-4 border-blue-500">
           <!-- Report Header -->
-          <div class="bg-gray-50 rounded p-4 mb-4">
+          <div class="mb-4">
             <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
               <div *ngIf="report.roleCategory">
                 <p class="text-gray-600">תפקיד</p>
@@ -96,39 +97,58 @@ import { CompanyDetailDto } from '@rd-intel/shared';
           </div>
 
           <!-- Overall Process -->
-          <div *ngIf="report.overallProcess" class="mb-4 p-3 bg-blue-50 rounded">
+          <div *ngIf="report.overallProcess" class="mb-4 p-3 bg-blue-50 rounded border border-blue-200">
             <p class="text-sm font-semibold text-gray-700 mb-1">תיאור התהליך:</p>
             <p class="text-gray-700 text-sm">{{ report.overallProcess }}</p>
           </div>
 
           <!-- Questions in this Report -->
-          <div class="space-y-4">
-            <div *ngFor="let question of report.questions; let j = index" class="border border-gray-200 rounded p-4 bg-gray-50">
-              <div class="flex items-start justify-between mb-2">
-                <div class="flex items-center gap-3">
-                  <span class="inline-block px-3 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded">
+          <div class="space-y-3">
+            <div *ngFor="let question of report.questions; let j = index" class="border-2 border-gray-300 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+              <!-- Question Header (Collapsible) -->
+              <div
+                (click)="toggleQuestion(question.id)"
+                class="bg-gradient-to-r from-blue-50 to-blue-100 p-4 cursor-pointer flex items-center justify-between hover:bg-gradient-to-r hover:from-blue-100 hover:to-blue-200 transition-colors">
+                <div class="flex items-center gap-3 flex-1 min-w-0">
+                  <span class="inline-block px-3 py-1 bg-blue-600 text-white text-xs font-semibold rounded flex-shrink-0">
                     {{ question.stageType }}
                   </span>
-                  <p class="text-xs text-gray-500">שאלה {{ j + 1 }}</p>
+                  <p class="text-sm font-semibold text-gray-900 truncate">{{ question.questionText }}</p>
                 </div>
-              </div>
-
-              <p class="text-gray-900 font-semibold mb-2">{{ question.questionText }}</p>
-
-              <div *ngIf="question.followUps" class="mb-2 text-sm text-gray-700 p-2 bg-yellow-50 rounded">
-                <p class="font-semibold text-gray-700">המשך:</p>
-                <p>{{ question.followUps }}</p>
-              </div>
-
-              <div *ngIf="question.tips" class="mb-2 text-sm text-gray-700 p-2 bg-green-50 rounded">
-                <p class="font-semibold text-gray-700">טיפים:</p>
-                <p>{{ question.tips }}</p>
-              </div>
-
-              <div *ngIf="question.tags.length" class="flex flex-wrap gap-1">
-                <span *ngFor="let tag of question.tags" class="inline-block px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded">
-                  {{ tag }}
+                <span class="text-lg text-blue-600 transition-transform" [class.rotate-180]="isQuestionExpanded(question.id)">
+                  ▼
                 </span>
+              </div>
+
+              <!-- Question Details (Expandable) -->
+              <div *ngIf="isQuestionExpanded(question.id)" class="bg-white p-4 border-t-2 border-gray-300 space-y-3">
+                <div class="text-xs text-gray-500 pb-2 border-b border-gray-200">
+                  שאלה {{ j + 1 }} / {{ report.questions.length }}
+                </div>
+
+                <div class="bg-blue-50 p-3 rounded border border-blue-200">
+                  <p class="font-semibold text-blue-900 text-sm mb-2">השאלה:</p>
+                  <p class="text-gray-800 text-sm leading-relaxed">{{ question.questionText }}</p>
+                </div>
+
+                <div *ngIf="question.followUps" class="p-3 bg-yellow-50 rounded border border-yellow-200">
+                  <p class="font-semibold text-yellow-900 text-sm mb-1">המשך:</p>
+                  <p class="text-gray-700 text-sm">{{ question.followUps }}</p>
+                </div>
+
+                <div *ngIf="question.tips" class="p-3 bg-green-50 rounded border border-green-200">
+                  <p class="font-semibold text-green-900 text-sm mb-1">טיפים:</p>
+                  <p class="text-gray-700 text-sm">{{ question.tips }}</p>
+                </div>
+
+                <div *ngIf="question.tags.length" class="pt-2 border-t border-gray-200">
+                  <p class="text-xs font-semibold text-gray-600 mb-2">תגיות:</p>
+                  <div class="flex flex-wrap gap-2">
+                    <span *ngFor="let tag of question.tags" class="inline-block px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded">
+                      {{ tag }}
+                    </span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -142,6 +162,7 @@ export class CompanyDetailComponent implements OnInit {
   company = signal<CompanyDetailDto | null>(null);
   isLoading = signal(true);
   error = signal<string | null>(null);
+  expandedQuestions = signal<Set<string>>(new Set());
   private slug: string = '';
 
   constructor(
@@ -175,5 +196,19 @@ export class CompanyDetailComponent implements OnInit {
 
   goBack() {
     this.router.navigate(['/companies']);
+  }
+
+  toggleQuestion(questionId: string) {
+    const expanded = new Set(this.expandedQuestions());
+    if (expanded.has(questionId)) {
+      expanded.delete(questionId);
+    } else {
+      expanded.add(questionId);
+    }
+    this.expandedQuestions.set(expanded);
+  }
+
+  isQuestionExpanded(questionId: string): boolean {
+    return this.expandedQuestions().has(questionId);
   }
 }
