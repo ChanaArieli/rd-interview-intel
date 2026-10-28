@@ -3,7 +3,7 @@ import { CanActivateFn, Router } from '@angular/router';
 import { AuthService } from './auth.service';
 
 /** Guard that prevents access to routes if the user is not authenticated. */
-export const authGuard: CanActivateFn = (route, state) => {
+export const authGuard: CanActivateFn = (_route, state) => {
   const authService = inject(AuthService);
   const router = inject(Router);
 
@@ -17,7 +17,7 @@ export const authGuard: CanActivateFn = (route, state) => {
 };
 
 /** Guard that prevents access to login/signup if already authenticated. */
-export const guestGuard: CanActivateFn = (route, state) => {
+export const guestGuard: CanActivateFn = (_route, _state) => {
   const authService = inject(AuthService);
   const router = inject(Router);
 

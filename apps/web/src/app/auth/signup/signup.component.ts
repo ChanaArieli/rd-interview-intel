@@ -1,8 +1,9 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../auth.service';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-signup',
@@ -164,7 +165,7 @@ export class SignupComponent {
     confirmPassword: ['', [Validators.required]]
   }, { validators: this.passwordMatchValidator });
 
-  private passwordMatchValidator(group: any) {
+  private passwordMatchValidator(group: AbstractControl): ValidationErrors | null {
     const password = group.get('password')?.value;
     const confirmPassword = group.get('confirmPassword')?.value;
     return password === confirmPassword ? null : { passwordMismatch: true };
@@ -186,8 +187,9 @@ export class SignupComponent {
       
       this.successMessage = 'Account created successfully! Redirecting...';
       setTimeout(() => this.router.navigate(['/companies']), 1500);
-    } catch (err: any) {
-      this.errorMessage = err.error?.message || 'Signup failed. Please try again.';
+    } catch (err: unknown) {
+      const error = err as HttpErrorResponse;
+      this.errorMessage = error.error?.message || 'Signup failed. Please try again.';
     } finally {
       this.loading = false;
     }
@@ -203,7 +205,7 @@ export class SignupComponent {
         this.successMessage = 'Account created! Redirecting...';
         setTimeout(() => this.router.navigate(['/companies']), 1500);
       },
-      error: (err) => {
+      error: (err: HttpErrorResponse) => {
         this.errorMessage = err.error?.message || 'Signup failed';
         this.loading = false;
       }

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../auth.service';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-login',
@@ -136,8 +137,9 @@ export class LoginComponent {
       ).toPromise();
       
       this.router.navigate(['/companies']);
-    } catch (err: any) {
-      this.errorMessage = err.error?.message || 'Login failed. Please try again.';
+    } catch (err: unknown) {
+      const error = err as HttpErrorResponse;
+      this.errorMessage = error.error?.message || 'Login failed. Please try again.';
     } finally {
       this.loading = false;
     }
@@ -149,7 +151,7 @@ export class LoginComponent {
 
     this.authService.devLogin(email, name).subscribe({
       next: () => this.router.navigate(['/companies']),
-      error: (err) => {
+      error: (err: HttpErrorResponse) => {
         this.errorMessage = err.error?.message || 'Login failed';
         this.loading = false;
       }
