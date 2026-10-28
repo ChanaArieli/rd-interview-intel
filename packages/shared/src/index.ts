@@ -8,8 +8,20 @@ export interface UserProfileDto {
   seniority: string | null;
   credits: number;
   hasCompletedOnboarding: boolean;
+  isAdmin: boolean;
   createdAt: Date;
   updatedAt: Date;
+}
+
+// Auth DTOs
+export interface DevLoginDto {
+  email: string;
+  name?: string;
+}
+
+export interface AuthResponseDto {
+  accessToken: string;
+  user: UserProfileDto;
 }
 
 // Company DTOs
@@ -71,6 +83,15 @@ export interface CreateInterviewQuestionDto {
   followUps?: string;
   tips?: string;
   tags: string[];
+}
+
+// Update DTO — all fields optional (owner-only edit)
+export interface UpdateInterviewQuestionDto {
+  stageType?: string;
+  questionText?: string;
+  followUps?: string | null;
+  tips?: string | null;
+  tags?: string[];
 }
 
 // LLM Validation Result

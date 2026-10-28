@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { PrismaModule } from './prisma/prisma.module';
 import { CompaniesModule } from './companies/companies.module';
 import { InterviewsModule } from './interviews/interviews.module';
+import { AuthModule } from './auth/auth.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { HealthController } from './health/health.controller';
@@ -15,7 +16,8 @@ import { HealthController } from './health/health.controller';
     }),
     PrismaModule,
     CompaniesModule,
-    InterviewsModule
+    InterviewsModule,
+    AuthModule
   ],
   controllers: [AppController, HealthController],
   providers: [AppService]

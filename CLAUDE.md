@@ -49,9 +49,13 @@ Israeli tech company interview intelligence and engineering culture platform —
 
 ### 3. Strict Anonymity by Design
 - **NO foreign keys on InterviewReport or InterviewQuestion**: Public interview data is completely decoupled from user identity
-- **NO userId field**: Interview submissions are anonymous
+- **NO userId field on the public models**: Interview submissions are anonymous in all public DTOs/APIs
 - **Interview Dates as Quarters**: Store only quarter strings (e.g., `"Q3 2026"`, `"Q4 2026"`)
 - **Impact**: Users cannot track who submitted what; pure knowledge base, no social graph
+- **Private ownership exception**: To support *owner-only edit*, submissions are linked to their author via a **separate private `QuestionOwnership` table** (`userId` + `questionId`). This table:
+  - is **never** exposed in any public DTO or API response (verified: `GET /api/companies/:slug` payloads contain no `userId`),
+  - has **no Prisma relation/FK to `InterviewQuestion`** (the `questionId` is stored as a plain string), so the public question model stays fully decoupled from identity,
+  - is used **server-side only** to authorize edits. Anonymity of the public knowledge base is preserved; ownership is a private authorization detail, not a social graph.
 
 ---
 
@@ -67,8 +71,9 @@ Israeli tech company interview intelligence and engineering culture platform —
 - `seniority` (String? — "Junior", "Mid", "Senior", "Staff / Lead")
 - `credits` (Int, default: 1)
 - `hasCompletedOnboarding` (Boolean, default: false)
+- `isAdmin` (Boolean, default: false — admins can delete any interview question)
 - `createdAt`, `updatedAt`
-- **Relations**: `unlocks CompanyUnlock[]`
+- **Relations**: `unlocks CompanyUnlock[]`, `questionOwnerships QuestionOwnership[]`
 
 ### Company
 - `id` (UUID, PK)
@@ -106,18 +111,28 @@ Israeli tech company interview intelligence and engineering culture platform —
 - `tips` (String? — hints for candidates)
 - `tags` (String[] — e.g., ["Distributed Systems", "Golang", "Performance"])
 - `createdAt`
+- **CRITICAL**: NO `userId` field (strict anonymity). Ownership for edit authorization lives in `QuestionOwnership` (below), not here.
+
+### QuestionOwnership (private — never exposed publicly)
+- `id` (UUID, PK)
+- `userId` (String, FK → User)
+- `questionId` (String, **unique**, NOT a Prisma relation/FK to InterviewQuestion — stored as plain string to keep the public model anonymity-clean)
+- `createdAt`
+- **Purpose**: server-side authorization for *owner-only edit* of questions. Created automatically for each question on submission. Never returned in any public DTO/API.
 
 ---
 
 ## Contract-First Development (`packages/shared`)
 
 ### DTOs & Interfaces
-- `UserProfileDto`
+- `UserProfileDto` (includes `isAdmin: boolean`)
+- `DevLoginDto`, `AuthResponseDto` (dev JWT login; swap-in point for Google OAuth)
 - `CompanySummaryDto` (name, slug, industry, reportCount, questionCount, stageTypes[], tags[])
 - `CompanyDetailDto` (extends CompanySummaryDto + reports[])
 - `InterviewReportDto`
 - `InterviewQuestionDto`
 - `CreateInterviewSubmissionDto`
+- `UpdateInterviewQuestionDto` (all fields optional — owner-only edit)
 - `LlmValidationResultDto`
 
 ---
@@ -168,9 +183,16 @@ Returns: `CompanySummaryDto[]`
 - Distinct stage types
 - All tags (aggregated)
 
+### Auth & Interview Mutation Endpoints (Implemented)
+- **POST /api/auth/dev-login** — dev-only JWT login (find-or-create user by email; returns `AuthResponseDto`). Temporary stand-in for Google OAuth; frontend stores the token and sends it as `Authorization: Bearer`.
+- **POST /api/interviews/submit** — submit an interview report. **Requires auth** (so `QuestionOwnership` can be recorded per question).
+- **PATCH /api/interviews/questions/:id** — edit a question. **Owner-only**: requires auth; returns `403` unless the caller is the question's author (checked via `QuestionOwnership`).
+- **DELETE /api/interviews/questions/:id** — delete a question. **Admin-only**: requires auth + `isAdmin` (`JwtAuthGuard` + `AdminGuard`).
+
+Auth plumbing lives in `apps/api/src/auth/`: `JwtAuthGuard`, `AdminGuard`, `@CurrentUser()` decorator, `AuthModule` (registers `JwtModule`). Frontend: `apps/web/src/app/auth/` (`AuthService` + functional `authInterceptor`).
+
 ### Additional Endpoints (Future Tasks)
-- POST /api/auth/google — Google OAuth signin
-- POST /api/interviews — Submit interview report
+- POST /api/auth/google — Google OAuth signin (replaces dev-login)
 - GET /api/companies/:slug — Company details (requires unlock)
 - Etc.
 
