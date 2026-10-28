@@ -20,10 +20,12 @@ model User {
   seniority               String?  // "Junior", "Mid", "Senior", "Staff / Lead"
   credits                 Int      @default(1)
   hasCompletedOnboarding  Boolean  @default(false)
+  isAdmin                 Boolean  @default(false)
   createdAt               DateTime @default(now())
   updatedAt               DateTime @updatedAt
 
   unlocks                 CompanyUnlock[]
+  questionOwnerships      QuestionOwnership[]
 
   @@map("users")
 }
@@ -83,4 +85,20 @@ model InterviewQuestion {
   report     InterviewReport @relation(fields: [reportId], references: [id], onDelete: Cascade)
 
   @@map("interview_questions")
+}
+
+// Private ownership record linking a user to a question they submitted.
+// Intentionally NOT a Prisma relation to InterviewQuestion: the public question
+// model stays fully anonymous (strict-anonymity principle). questionId is stored
+// as a plain string and is never exposed in any public DTO. Used server-side only
+// to authorize owner-only edits.
+model QuestionOwnership {
+  id         String   @id @default(uuid())
+  userId     String
+  questionId String   @unique
+  createdAt  DateTime @default(now())
+
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("question_ownership")
 }
